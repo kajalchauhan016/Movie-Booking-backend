@@ -42,17 +42,16 @@ exports.login = async (req, res) => {
       return res.json({ mssg: "All fields are required" });
     }
     const userfind = await User.findOne({ email });
-    if (userfind) {
-      const newData = {
-        Firstname: userfind?.Firstname,
-        Lastname: userfind?.Lastname,
-        email: userfind?.email,
-        _id: userfind?._id.toString(),
-      };
-    }
+
     if (userfind) {
       const hashPassword = await bcrypt.compare(password, userfind.password);
       if (hashPassword) {
+        const newData = {
+          Firstname: userfind?.Firstname,
+          Lastname: userfind?.Lastname,
+          email: userfind?.email,
+          _id: userfind?._id.toString(),
+        };
         return res.status(200).json({
           mssg: "user Login",
           token: generateToken(newData),
