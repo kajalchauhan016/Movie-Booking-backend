@@ -3,6 +3,11 @@
 const mongoose = require("mongoose");
 
 const seatBookingSchema = new mongoose.Schema({
+    bookingId: {
+    type: String,
+    required: true,
+    unique: true
+  },
   movie: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Movie",
@@ -12,7 +17,8 @@ const seatBookingSchema = new mongoose.Schema({
   showTime: String,
   seats: [String],
   userName: String,
-  totalAmount: Number
+  totalAmount: Number,
+
 });
 
 module.exports = mongoose.model("Booking", seatBookingSchema);

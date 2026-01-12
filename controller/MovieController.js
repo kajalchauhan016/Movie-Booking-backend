@@ -1,6 +1,7 @@
 const Movie = require("../model/MovieModel");
 // const Show = require("../model/SeatModel");
 // const createSeats = require("../utils/createSeats");
+const mongoose = require("mongoose");
 
 const Booking = require("../model/SeatBooking");
 // const Movie = require("../models/MovieModel");
@@ -126,50 +127,55 @@ exports.getSeats = async (req, res) => {
   }
 };
 
+
 exports.bookShow = async (req, res) => {
   try {
     const { movieId, userName, showDate, showTime, seats } = req.body;
 
-  
+    // 1. Check movie exists
     const movie = await Movie.findById(movieId);
     if (!movie) {
-      return res.status(404).json({ success: false, message: "Movie not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found"
+      });
     }
 
- 
-    const existing = await Booking.find({
+    // 2. Check if seats already booked
+    const alreadyBooked = await Booking.find({
       movie: movieId,
       showDate,
       showTime,
       seats: { $in: seats }
     });
 
-    if (existing.length > 0) {
+    if (alreadyBooked.length > 0) {
       return res.status(400).json({
         success: false,
         message: "Some seats are already booked"
       });
     }
 
-    const ticketPrice = 200;
-    const totalAmount = seats.length * ticketPrice;
-
+    // 3. Create booking
     const booking = await Booking.create({
+      bookingId: `BOOK-${Date.now()}`,
       movie: movieId,
       userName,
       showDate,
       showTime,
       seats,
-      totalAmount
+      totalAmount: seats.length * 200
     });
 
+    // 4. Success response
     res.status(201).json({
       success: true,
       message: "Show booked successfully",
       data: booking
     });
 
-  } catch (error) {
+  } catch (err) {
+    console.error("Booking error:", err);
     res.status(500).json({
       success: false,
       message: "Booking failed"
@@ -178,5 +184,31 @@ exports.bookShow = async (req, res) => {
 };
 
 
+
+exports.getTicket = async (req, res) => {
+  try {
+    const booking = await Booking
+      .findOne({ bookingId: req.params.bookingId })
+      .populate("movie");
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking Ticket not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: booking
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching ticket"
+    });
+  }
+};
 
 

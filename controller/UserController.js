@@ -3,39 +3,32 @@ const bcrypt = require("bcrypt");
 const generateToken = require("../helper/token");
 
 exports.signup = async (req, res) => {
-  console.log("=====>>>")
   try {
     const { firstName, lastName, email, password } = req.body;
-console.log('====================================',firstName);
-console.log("555");
-console.log('====================================');
+
+    if (!password) {
+      return res.status(400).json({ mssg: "Password is required" });
+    }
+
     const hash = await bcrypt.hash(password, 10);
+
     const addUser = await User.create({
-       firstName,
+      firstName,
       lastName,
       email,
       password: hash,
     });
-console.log('====================================');
-console.log(addUser);
-console.log('====================================');
-    const newData = {
-      firstName: addUser.firstName,
-      lastName: addUser.lastName,
-      email: addUser.email,
-      _id: addUser._id.toString(),
-    };
-
+ 
     return res.status(201).json({
       mssg: "User created",
       data: addUser,
-      token: generateToken(newData),
+      token: generateToken({ _id: addUser._id }),
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ mssg: error.message || "Internal server error" });
+    return res.status(500).json({ mssg: error.message });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {

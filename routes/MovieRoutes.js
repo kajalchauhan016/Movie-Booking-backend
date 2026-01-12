@@ -4,7 +4,8 @@ const {
   getMovies,
   getSingleMovie,
   getSeats,
-  bookShow
+  bookShow,
+  getTicket
 
 } = require("../controller/MovieController");
 
@@ -16,6 +17,8 @@ routes.get("/movie/:id", getSingleMovie);
 
 routes.get("/seats", getSeats);
 routes.post("/book-show", bookShow);
+routes.get("/getTicket/:bookingId", getTicket);
+
 
 
 module.exports = routes;
